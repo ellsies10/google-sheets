@@ -1,0 +1,159 @@
+function incrementDays() {
+  if (1) {
+    var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("TASK_SHEET");
+    var totalDayCell = sheet.getRange("J17");
+    var currentValue = totalDayCell.getValue();
+    totalDayCell.setValue(currentValue + 1);
+
+    var startRow = 2;
+    var startCol = 2; // B
+    var numRows = 4;  // Up to row 5
+    var numCols = 6;  // Up to col G
+
+    var tallyRange = sheet.getRange(startRow, startCol, numRows, numCols);
+    var values = tallyRange.getValues();
+
+    for (var i = 0; i < numCols; i++) {
+      if ((values[0][i] + values[1][i] + values[2][i] + values[3][i]) != (currentValue + 1)) {
+        values[3][i] = values[3][i] + 1;
+      }
+    }
+
+    tallyRange.setValues(values);
+
+    // var taskRange = sheet.getRange("B8:G26");
+    // taskRange.clearContent();
+    // taskRange.setBackground("#FFFFFF");
+
+    var dailyLeadersRange = sheet.getRange("J11:J12");
+    dailyLeadersRange.clearContent();
+
+    if (didMonthEnd()) {
+      resetMonth();
+    }
+  }
+}
+
+function pfft() {
+  var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("TASK_SHEET");
+
+  sheet.getRange("I19").setValue("Try to delete me :)");
+}
+
+function updateLeaderboard() {
+  var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("TASK_SHEET");
+
+  var scoreRange = sheet.getRange("B6:G6");
+  var scores = scoreRange.getValues();
+
+  var nameRange = sheet.getRange("B1:G1");
+  var names = nameRange.getValues();
+
+  var nameSpace = sheet.getRange("J3:J8");
+  var nameVals = nameSpace.getValues();
+
+  var scoreSpace = sheet.getRange("K3:K8");
+  var scoreVals = scoreSpace.getValues();
+
+  for (var i = 0; i < 6; i++) {
+    var curScore = scoreVals[i];
+    var idx = -1;
+    for (var j = 0; j < 6; j++) {
+      var checkScore = scores[0][j];
+      if (checkScore == curScore && names[0][j] != "null") {
+        idx = j;
+        break;
+      }
+    }
+    nameVals[0][i] = names[0][idx];
+    names[0][idx] = "null";
+  }
+
+  sheet.getRange("J3").setValue(nameVals[0][0]);
+  sheet.getRange("J4").setValue(nameVals[0][1]);
+  sheet.getRange("J5").setValue(nameVals[0][2]);
+  sheet.getRange("J6").setValue(nameVals[0][3]);
+  sheet.getRange("J7").setValue(nameVals[0][4]);
+  sheet.getRange("J8").setValue(nameVals[0][5]);
+  
+}
+
+function resetMonth() {
+  var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("TASK_SHEET");
+
+  // Zero out the day counters
+  var range = sheet.getRange("B2:G5");
+  var numRows = range.getNumRows();
+  var numCols = range.getNumColumns();
+  var zeroArray = Array.from({ length: numRows }, () => Array(numCols).fill(0));
+  range.setValues(zeroArray);
+
+  // Reset the dates
+  var today = new Date();
+  var beginningOfMonth = new Date(today.getFullYear(), today.getMonth(), 1); // First day of the current month
+  var endOfMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0); // Set to the 0th day of the next month
+
+  var formattedBeginDate = Utilities.formatDate(beginningOfMonth, Session.getScriptTimeZone(), "MM/dd/yyyy");
+  var formattedEndDate = Utilities.formatDate(endOfMonth, Session.getScriptTimeZone(), "MM/dd/yyyy");
+  
+  sheet.getRange("J15").setValue(formattedBeginDate);
+  sheet.getRange("J16").setValue(formattedEndDate);
+  sheet.getRange("J17").setValue(0);
+
+  updateArchive();
+
+  var totalMonthCell = sheet.getRange("J24");
+  var currMonthValue = totalMonthCell.getValue();
+  totalMonthCell.setValue(currMonthValue + 1);
+
+}
+
+function updateArchive() {
+  var archiveSheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("HALL_OF_FAME");
+  var taskSheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("TASK_SHEET");
+
+  var monthsCompleted = taskSheet.getRange("J24").getValue();
+  var curRow = (monthsCompleted + 2);
+
+  var firstPlace = capitalizeFirstLetter(taskSheet.getRange("J3").getValue());
+  var secondPlace = capitalizeFirstLetter(taskSheet.getRange("J4").getValue());
+  var thirdPlace = capitalizeFirstLetter(taskSheet.getRange("J5").getValue());
+
+  archiveSheet.getRange("B" + curRow).setValue(getLastMonthName());
+  archiveSheet.getRange("C" + curRow).setValue(firstPlace);
+  archiveSheet.getRange("D" + curRow).setValue(secondPlace);
+  archiveSheet.getRange("E" + curRow).setValue(thirdPlace);
+
+  if (getLastMonthName() == "January") {
+    var today = new Date();
+    var currentYear = today.getFullYear(); // Get the current year
+    archiveSheet.getRange("A" + curRow).setValue(currentYear);
+  }
+
+}
+
+function capitalizeFirstLetter(str) {
+  // Make the entire string lowercase, then capitalize only the first letter
+  return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
+}
+
+function getLastMonthName() {
+  var today = new Date();
+  today.setMonth(today.getMonth() - 1); // Go back one month
+  var monthName = today.toLocaleString('default', { month: 'long' });
+  return monthName;
+}
+
+function didMonthEnd() {
+  var today = new Date();
+  var isFirst = today.getDate() === 1; // Check if today is the first day of the month
+  
+  if (isFirst) {
+    Logger.log("Today is the first of the month.");
+  } else {
+    Logger.log("Today is not the first of the month.");
+  }
+  
+  return isFirst;
+}
+
