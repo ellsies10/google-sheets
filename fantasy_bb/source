@@ -4,24 +4,6 @@ function updateLeaderboard() {
   sortPlayers()
 }
 
-function swapRowValues(sheet, row1, row2, columns, numCols) {
-
-  var rowSheet = SpreadsheetApp.getActiveSpreadsheet
-
-  for (var i = 0; i < numCols; i++) {
-    var col = columns[i];
-    var cell1 = sheet.getRange(row1, col);
-    var cell2 = sheet.getRange(row2, col);
-    
-    var temp = cell1.getValue();
-    cell1.setValue(cell2.getValue());
-    cell2.setValue(temp);
-
-    if (i == 0)
-      Logger.log("Swapped " + temp + " and " + cell1.getValue());
-  }
-}
-
 function calculateScores(numRows) {
   var hgSheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("houseguestRankings")
   var playerRange = hgSheet.getRange("A3:A18")
@@ -61,4 +43,10 @@ function calculateScores(numRows) {
   }
 
   boardRange.setValues(boardVals)
+}
+
+function sortPlayers(){
+  var player_sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("leaderboard")
+  var boardRange = player_sheet.getRange("B2:G26")
+  boardRange.sort({column: 3, ascending: false});
 }
