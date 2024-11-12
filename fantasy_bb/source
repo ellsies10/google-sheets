@@ -1,0 +1,64 @@
+function updateLeaderboard() {
+  numRows = 25
+  calculateScores(numRows)
+  sortPlayers()
+}
+
+function swapRowValues(sheet, row1, row2, columns, numCols) {
+
+  var rowSheet = SpreadsheetApp.getActiveSpreadsheet
+
+  for (var i = 0; i < numCols; i++) {
+    var col = columns[i];
+    var cell1 = sheet.getRange(row1, col);
+    var cell2 = sheet.getRange(row2, col);
+    
+    var temp = cell1.getValue();
+    cell1.setValue(cell2.getValue());
+    cell2.setValue(temp);
+
+    if (i == 0)
+      Logger.log("Swapped " + temp + " and " + cell1.getValue());
+  }
+}
+
+function calculateScores(numRows) {
+  var hgSheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("houseguestRankings")
+  var playerRange = hgSheet.getRange("A3:A18")
+  var playerList = playerRange.getValues()
+  //Logger.log(playerList)
+  //Logger.log(playerList[0])
+
+  var scoreRange = hgSheet.getRange("B3:B18")
+  var scoreList = scoreRange.getValues()
+  var scoreNums = scoreList.map(function(str) {
+    return parseInt(str, 10);
+  });
+
+  Logger.log(scoreNums[0])
+
+  var player_sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("leaderboard")
+  var boardRange = player_sheet.getRange("B2:G26")
+  var boardVals = boardRange.getValues()
+
+  //Logger.log(boardVals)
+
+  for (var i = 0; i < numRows; i++){
+    var total = 0
+    var wp = boardVals[i][2]
+    var draft1 = boardVals[i][3]
+    var draft2 = boardVals[i][4]
+    var draft3 = boardVals[i][5]
+    for (var j = 1; j <= 16; j++) {
+      if (playerList[j] == wp) {
+        total += (1.25 * scoreNums[j])
+      }
+      else if (playerList[j] == draft1 || playerList[j] == draft2 || playerList[j] == draft3) {
+        total += scoreNums[j]
+      }
+    }
+    boardVals[i][1] = total
+  }
+
+  boardRange.setValues(boardVals)
+}
