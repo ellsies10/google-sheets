@@ -90,8 +90,8 @@ function resetMonth() {
 
   // Reset the dates
   var today = new Date();
-  var beginningOfMonth = new Date(today.getFullYear(), today.getMonth(), 1); // First day of the current month
-  var endOfMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0); // Set to the 0th day of the next month
+  var beginningOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+  var endOfMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0); 
 
   var formattedBeginDate = Utilities.formatDate(beginningOfMonth, Session.getScriptTimeZone(), "MM/dd/yyyy");
   var formattedEndDate = Utilities.formatDate(endOfMonth, Session.getScriptTimeZone(), "MM/dd/yyyy");
@@ -133,7 +133,6 @@ function updateArchive() {
 }
 
 function capitalizeFirstLetter(str) {
-  // Make the entire string lowercase, then capitalize only the first letter
   return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
 }
 
